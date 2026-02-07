@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Button, Icon, Text } from 'react-native-paper';
 import { useTrackerStore } from '../../store/useTrackerStore';
 import { TrackingCard } from './TrackingCard';
 
@@ -13,33 +13,78 @@ export const NursingTracker: React.FC = () => {
 
     const [leftElapsed, setLeftElapsed] = useState(0);
     const [rightElapsed, setRightElapsed] = useState(0);
+    const [leftAccumulated, setLeftAccumulated] = useState(0);
+    const [rightAccumulated, setRightAccumulated] = useState(0);
+    const [leftStoppedDuration, setLeftStoppedDuration] = useState<number | null>(null);
+    const [rightStoppedDuration, setRightStoppedDuration] = useState<number | null>(null);
+    const [lastStoppedSide, setLastStoppedSide] = useState<'left' | 'right' | null>(null);
 
     useEffect(() => {
         const updateTime = () => {
-            if (leftTimer) setLeftElapsed(Math.floor((Date.now() - leftTimer.startTime) / 1000));
-            if (rightTimer) setRightElapsed(Math.floor((Date.now() - rightTimer.startTime) / 1000));
+            if (leftTimer) {
+                setLeftElapsed(leftAccumulated + Math.floor((Date.now() - leftTimer.startTime) / 1000));
+            } else {
+                setLeftElapsed(leftAccumulated);
+            }
+            if (rightTimer) {
+                setRightElapsed(rightAccumulated + Math.floor((Date.now() - rightTimer.startTime) / 1000));
+            } else {
+                setRightElapsed(rightAccumulated);
+            }
         };
 
         const interval = setInterval(updateTime, 1000);
         return () => clearInterval(interval);
-    }, [leftTimer, rightTimer]);
+    }, [leftTimer, rightTimer, leftAccumulated, rightAccumulated]);
 
     const toggleSide = (side: 'left' | 'right') => {
         const isActive = side === 'left' ? !!leftTimer : !!rightTimer;
 
         if (isActive) {
             const duration = stopTimer('nursing', side);
-            addLog({
-                type: 'nursing',
-                timestamp: new Date().toISOString(),
-                duration,
-                details: { side },
-            });
-            if (side === 'left') setLeftElapsed(0);
-            else setRightElapsed(0);
+            if (side === 'left') {
+                const total = leftAccumulated + duration;
+                setLeftAccumulated(total);
+                setLeftStoppedDuration(duration);
+                setLeftElapsed(total);
+            } else {
+                const total = rightAccumulated + duration;
+                setRightAccumulated(total);
+                setRightStoppedDuration(duration);
+                setRightElapsed(total);
+            }
+            setLastStoppedSide(side);
         } else {
+            if (side === 'left') {
+                setLeftStoppedDuration(null);
+            } else {
+                setRightStoppedDuration(null);
+            }
+            setLastStoppedSide(null);
             startTimer('nursing', side);
         }
+    };
+
+    const handleSave = () => {
+        if (!lastStoppedSide) return;
+        const duration = lastStoppedSide === 'left' ? leftStoppedDuration : rightStoppedDuration;
+        if (duration === null) return;
+        addLog({
+            type: 'nursing',
+            timestamp: new Date().toISOString(),
+            duration,
+            details: { side: lastStoppedSide },
+        });
+        if (lastStoppedSide === 'left') {
+            setLeftStoppedDuration(null);
+            setLeftElapsed(0);
+            setLeftAccumulated(0);
+        } else {
+            setRightStoppedDuration(null);
+            setRightElapsed(0);
+            setRightAccumulated(0);
+        }
+        setLastStoppedSide(null);
     };
 
     const formatTime = (seconds: number) => {
@@ -50,38 +95,90 @@ export const NursingTracker: React.FC = () => {
 
     return (
         <TrackingCard title="Nursing">
+            <Text variant="titleLarge" style={styles.combinedTime}>
+                {formatTime(leftElapsed + rightElapsed)}
+            </Text>
             <View style={styles.row}>
                 <View style={styles.sideContainer}>
-                    <Text variant="labelLarge" style={styles.label}>Left</Text>
-                    <Text variant="titleLarge" style={styles.timer}>{formatTime(leftElapsed)}</Text>
-                    <Button
-                        mode={leftTimer ? "contained" : "outlined"}
+                    <Pressable
                         onPress={() => toggleSide('left')}
-                        compact
-                        style={styles.button}
+                        style={({ pressed }) => [
+                            styles.circleButton,
+                            leftTimer ? styles.circleButtonActive : styles.circleButtonInactive,
+                            pressed && styles.circleButtonPressed,
+                        ]}
                     >
-                        {leftTimer ? "Stop" : "Start"}
-                    </Button>
+                        <Text
+                            variant="labelLarge"
+                            style={[styles.circleLabel, leftTimer ? styles.circleLabelActive : styles.circleLabelInactive]}
+                        >
+                            Left
+                        </Text>
+                        <Text
+                            variant="titleLarge"
+                            style={[styles.circleTimer, leftTimer ? styles.circleTimerActive : styles.circleTimerInactive]}
+                        >
+                            {formatTime(leftElapsed)}
+                        </Text>
+                        <Icon
+                            source={leftTimer ? 'pause' : 'play'}
+                            size={20}
+                            color={leftTimer ? '#FFFFFF' : '#F59E0B'}
+                        />
+                    </Pressable>
                 </View>
 
                 <View style={styles.sideContainer}>
-                    <Text variant="labelLarge" style={styles.label}>Right</Text>
-                    <Text variant="titleLarge" style={styles.timer}>{formatTime(rightElapsed)}</Text>
-                    <Button
-                        mode={rightTimer ? "contained" : "outlined"}
+                    <Pressable
                         onPress={() => toggleSide('right')}
-                        compact
-                        style={styles.button}
+                        style={({ pressed }) => [
+                            styles.circleButton,
+                            rightTimer ? styles.circleButtonActive : styles.circleButtonInactive,
+                            pressed && styles.circleButtonPressed,
+                        ]}
                     >
-                        {rightTimer ? "Stop" : "Start"}
-                    </Button>
+                        <Text
+                            variant="labelLarge"
+                            style={[styles.circleLabel, rightTimer ? styles.circleLabelActive : styles.circleLabelInactive]}
+                        >
+                            Right
+                        </Text>
+                        <Text
+                            variant="titleLarge"
+                            style={[styles.circleTimer, rightTimer ? styles.circleTimerActive : styles.circleTimerInactive]}
+                        >
+                            {formatTime(rightElapsed)}
+                        </Text>
+                        <Icon
+                            source={rightTimer ? 'pause' : 'play'}
+                            size={20}
+                            color={rightTimer ? '#FFFFFF' : '#F59E0B'}
+                        />
+                    </Pressable>
                 </View>
             </View>
+            {lastStoppedSide && (
+                <Button
+                    mode="contained"
+                    onPress={handleSave}
+                    style={styles.saveButton}
+                    buttonColor="#F59E0B"
+                    textColor="#FFFFFF"
+                    contentStyle={{ height: 44 }}
+                >
+                    Save
+                </Button>
+            )}
         </TrackingCard>
     );
 };
 
 const styles = StyleSheet.create({
+    combinedTime: {
+        textAlign: 'center',
+        marginBottom: 8,
+        fontVariant: ['tabular-nums'],
+    },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -94,14 +191,48 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         borderRadius: 8,
     },
-    label: {
-        marginBottom: 4,
+    circleButton: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
     },
-    timer: {
-        marginBottom: 8,
+    circleButtonActive: {
+        backgroundColor: '#F59E0B',
+    },
+    circleButtonInactive: {
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderColor: '#F59E0B',
+    },
+    circleButtonPressed: {
+        opacity: 0.85,
+    },
+    circleLabel: {
+        color: '#FFFFFF',
+    },
+    circleTimer: {
+        color: '#FFFFFF',
         fontVariant: ['tabular-nums'],
     },
-    button: {
-        width: '100%',
+    circleLabelActive: {
+        color: '#FFFFFF',
+    },
+    circleLabelInactive: {
+        color: '#F59E0B',
+    },
+    circleTimerActive: {
+        color: '#FFFFFF',
+    },
+    circleTimerInactive: {
+        color: '#F59E0B',
+    },
+    saveButton: {
+        marginTop: 12,
+        alignSelf: 'stretch',
+        borderRadius: 8,
+        marginHorizontal: 8,
     },
 });

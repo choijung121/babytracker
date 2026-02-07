@@ -49,7 +49,7 @@ export const DailySummary: React.FC = () => {
                             left={props => <List.Icon {...props} icon={getIcon(log.type)} />}
                             right={props => (
                                 <View style={styles.rightContainer}>
-                                    <Text variant="bodySmall">{format(new Date(log.timestamp), 'h:mm a')}</Text>
+                                    <Text variant="bodySmall">{format(new Date(log.timestamp), 'MMM d, h:mm a')}</Text>
                                     <IconButton icon="delete" size={20} onPress={() => removeLog(log.id)} />
                                 </View>
                             )}

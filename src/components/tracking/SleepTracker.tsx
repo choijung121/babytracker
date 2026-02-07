@@ -12,6 +12,7 @@ export const SleepTracker: React.FC = () => {
     const startTime = activeTimers['sleep']?.startTime;
 
     const [elapsed, setElapsed] = useState(0);
+    const [stoppedDuration, setStoppedDuration] = useState<number | null>(null);
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
@@ -26,15 +27,24 @@ export const SleepTracker: React.FC = () => {
     const handleToggle = () => {
         if (isSleeping) {
             const duration = stopTimer('sleep');
-            addLog({
-                type: 'sleep',
-                timestamp: new Date().toISOString(),
-                duration: duration,
-            });
+            setStoppedDuration(duration);
+            setElapsed(Math.floor(duration));
         } else {
             setElapsed(0);
+            setStoppedDuration(null);
             startTimer('sleep');
         }
+    };
+
+    const handleSave = () => {
+        if (stoppedDuration === null) return;
+        addLog({
+            type: 'sleep',
+            timestamp: new Date().toISOString(),
+            duration: stoppedDuration,
+        });
+        setStoppedDuration(null);
+        setElapsed(0);
     };
 
     const formatTime = (seconds: number) => {
@@ -59,6 +69,18 @@ export const SleepTracker: React.FC = () => {
                 >
                     {isSleeping ? 'Stop' : 'Start'}
                 </Button>
+                {!isSleeping && stoppedDuration !== null && (
+                    <Button
+                        mode="contained"
+                        onPress={handleSave}
+                        style={[styles.button, styles.saveButton]}
+                        buttonColor="#F59E0B"
+                        textColor="#FFFFFF"
+                        contentStyle={{ height: 48 }}
+                    >
+                        Save
+                    </Button>
+                )}
             </View>
         </TrackingCard>
     );
@@ -70,5 +92,8 @@ const styles = StyleSheet.create({
     },
     button: {
         borderRadius: 8,
+    },
+    saveButton: {
+        marginTop: 12,
     },
 });
