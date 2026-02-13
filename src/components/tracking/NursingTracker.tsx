@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Button, Icon, Text } from 'react-native-paper';
+import { Icon, Text } from 'react-native-paper';
 import { useTrackerStore } from '../../store/useTrackerStore';
+import { SaveButton } from './SaveButton';
 import { TrackingCard } from './TrackingCard';
 
 export const NursingTracker: React.FC = () => {
@@ -95,7 +96,7 @@ export const NursingTracker: React.FC = () => {
 
     return (
         <TrackingCard title="Nursing">
-            <Text variant="titleLarge" style={styles.combinedTime}>
+            <Text variant="displayMedium" style={styles.combinedTime}>
                 {formatTime(leftElapsed + rightElapsed)}
             </Text>
             <View style={styles.row}>
@@ -123,7 +124,7 @@ export const NursingTracker: React.FC = () => {
                         <Icon
                             source={leftTimer ? 'pause' : 'play'}
                             size={20}
-                            color={leftTimer ? '#FFFFFF' : '#F59E0B'}
+                            color={leftTimer ? '#FFFFFF' : '#6750A4'}
                         />
                     </Pressable>
                 </View>
@@ -152,22 +153,13 @@ export const NursingTracker: React.FC = () => {
                         <Icon
                             source={rightTimer ? 'pause' : 'play'}
                             size={20}
-                            color={rightTimer ? '#FFFFFF' : '#F59E0B'}
+                            color={rightTimer ? '#FFFFFF' : '#6750A4'}
                         />
                     </Pressable>
                 </View>
             </View>
             {lastStoppedSide && (
-                <Button
-                    mode="contained"
-                    onPress={handleSave}
-                    style={styles.saveButton}
-                    buttonColor="#F59E0B"
-                    textColor="#FFFFFF"
-                    contentStyle={{ height: 44 }}
-                >
-                    Save
-                </Button>
+                <SaveButton onPress={handleSave} style={styles.saveButton} />
             )}
         </TrackingCard>
     );
@@ -200,12 +192,12 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     circleButtonActive: {
-        backgroundColor: '#F59E0B',
+        backgroundColor: '#6750A4',
     },
     circleButtonInactive: {
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderColor: '#F59E0B',
+        borderColor: '#6750A4',
     },
     circleButtonPressed: {
         opacity: 0.85,
@@ -221,13 +213,13 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     circleLabelInactive: {
-        color: '#F59E0B',
+        color: '#6750A4',
     },
     circleTimerActive: {
         color: '#FFFFFF',
     },
     circleTimerInactive: {
-        color: '#F59E0B',
+        color: '#6750A4',
     },
     saveButton: {
         marginTop: 12,

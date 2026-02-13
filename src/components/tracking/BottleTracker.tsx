@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, SegmentedButtons, TextInput } from 'react-native-paper';
+import { SegmentedButtons, TextInput } from 'react-native-paper';
 import { useTrackerStore } from '../../store/useTrackerStore';
+import { SaveButton } from './SaveButton';
 import { TrackingCard } from './TrackingCard';
 
 export const BottleTracker: React.FC = () => {
@@ -41,12 +42,10 @@ export const BottleTracker: React.FC = () => {
                             { value: 'oz', label: 'oz' },
                             { value: 'ml', label: 'ml' },
                         ]}
-                        style={{ flex: 0.6 }}
+                        style={{ flex: 1 }}
                     />
                 </View>
-                <Button mode="contained" onPress={handleSave} style={{ marginTop: 8 }}>
-                    Log Bottle
-                </Button>
+                <SaveButton onPress={handleSave} style={styles.saveButton} />
             </View>
         </TrackingCard>
     );
@@ -61,4 +60,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
     },
+    saveButton: {
+        marginTop: 12,
+        alignSelf: 'stretch',
+        borderRadius: 8,
+        marginHorizontal: 8,
+    }
 });

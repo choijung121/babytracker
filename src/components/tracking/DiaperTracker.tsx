@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Chip } from 'react-native-paper';
+import { Chip } from 'react-native-paper';
 import { useTrackerStore } from '../../store/useTrackerStore';
+import { SaveButton } from './SaveButton';
 import { TrackingCard } from './TrackingCard';
 
 export const DiaperTracker: React.FC = () => {
@@ -47,13 +48,7 @@ export const DiaperTracker: React.FC = () => {
                         Poo
                     </Chip>
                 </View>
-                <Button
-                    mode="contained"
-                    onPress={handleSave}
-                    disabled={selection.length === 0}
-                >
-                    Save Diaper
-                </Button>
+                <SaveButton onPress={handleSave} style={styles.saveButton} />
             </View>
         </TrackingCard>
     );
@@ -70,6 +65,11 @@ const styles = StyleSheet.create({
     },
     chip: {
         minWidth: 80,
-        justifyContent: 'center',
     },
+    saveButton: {
+        marginTop: 12,
+        alignSelf: 'stretch',
+        borderRadius: 8,
+        marginHorizontal: 8,
+    }
 });

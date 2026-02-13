@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { useTrackerStore } from '../../store/useTrackerStore';
+import { SaveButton } from './SaveButton';
 import { TrackingCard } from './TrackingCard';
 
 export const SleepTracker: React.FC = () => {
@@ -70,16 +71,11 @@ export const SleepTracker: React.FC = () => {
                     {isSleeping ? 'Stop' : 'Start'}
                 </Button>
                 {!isSleeping && stoppedDuration !== null && (
-                    <Button
-                        mode="contained"
+                    <SaveButton
                         onPress={handleSave}
                         style={[styles.button, styles.saveButton]}
-                        buttonColor="#F59E0B"
-                        textColor="#FFFFFF"
-                        contentStyle={{ height: 48 }}
-                    >
-                        Save
-                    </Button>
+                        height={48}
+                    />
                 )}
             </View>
         </TrackingCard>
