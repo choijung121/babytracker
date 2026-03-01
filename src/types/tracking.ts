@@ -11,6 +11,10 @@ export interface LogEntry {
         unit?: 'oz' | 'ml'; // For bottle
         contents?: ('pee' | 'poo')[]; // For diaper
         note?: string; // For custom/others
+        startTime?: string; // For sleep labels
+        endTime?: string; // For sleep labels
+        startTimestamp?: number; // For sleep timestamps
+        endTimestamp?: number; // For sleep timestamps
     };
 }
 

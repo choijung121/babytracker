@@ -1,19 +1,21 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 
 interface TrackingCardProps {
     title: string;
     icon?: string;
     children: React.ReactNode;
+    style?: StyleProp<ViewStyle>;
+    contentStyle?: StyleProp<ViewStyle>;
 }
 
-export const TrackingCard: React.FC<TrackingCardProps> = ({ title, children }) => {
+export const TrackingCard: React.FC<TrackingCardProps> = ({ title, children, style, contentStyle }) => {
     const theme = useTheme();
 
     return (
-        <Card style={styles.card}>
-            <Card.Content>
+        <Card style={[styles.card, style]}>
+            <Card.Content style={contentStyle}>
                 <View style={styles.header}>
                     <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
                         {title}
